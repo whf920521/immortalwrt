@@ -4,6 +4,7 @@
 # 默认WIFI设置
 BASE_SSID='OWRT'
 BASE_WORD='12345678'
+BASE_POWER='auto'
 
 # 获取无线设备的数量
 RADIO_NUM=$(uci show wireless | grep -c "wifi-device")
@@ -29,14 +30,14 @@ configure_wifi() {
 
 	uci set wireless.radio${radio}.channel=${channel}
 	uci set wireless.radio${radio}.htmode=${htmode}
+	uci set wireless.radio${radio}.txpower=${BASE_POWER}
 	uci set wireless.radio${radio}.country='CN'
 	uci set wireless.radio${radio}.disabled='0'
-	uci set wireless.radio${radio}.cell_density='0'
 	uci set wireless.radio${radio}.mu_beamformer='1'
 
 	uci set wireless.default_radio${radio}.ssid=${ssid}
-	uci set wireless.default_radio${radio}.encryption='psk2+ccmp'
 	uci set wireless.default_radio${radio}.key=${BASE_WORD}
+	uci set wireless.default_radio${radio}.encryption='psk2+ccmp'
 	uci set wireless.default_radio${radio}.ieee80211k='1'
 	uci set wireless.default_radio${radio}.time_advertisement='2'
 	uci set wireless.default_radio${radio}.time_zone='CST-8'
@@ -82,15 +83,15 @@ set_wifi_def_cfg() {
 	local path=$(uci get wireless.radio${1}.path)
 	local htmode=$(query_mode "$path")
 	local channel='auto'
-	local WIFI_SSID="$BASE_SSID"
+	local ssid="$BASE_SSID"
 
 	case "$band" in
 	'5g')
 		if [ -z "$FIRST_5G" ]; then
-			[ "$RADIO_NUM" -gt 2 ] && WIFI_SSID="${BASE_SSID}-5G_1" || WIFI_SSID="${BASE_SSID}-5G"
+			[ "$RADIO_NUM" -gt 2 ] && ssid="${BASE_SSID}-5G_1" || ssid="${BASE_SSID}-5G"
 			FIRST_5G=1
 		else
-			WIFI_SSID="${BASE_SSID}-5G_2"
+			ssid="${BASE_SSID}-5G_2"
 		fi
 		;;
 	*)
@@ -102,7 +103,7 @@ set_wifi_def_cfg() {
 		;;
 	esac
 
-	configure_wifi "$1" "$channel" "$htmode" "$WIFI_SSID"
+	configure_wifi "$1" "$channel" "$htmode" "$ssid"
 }
 
 for i in $(seq 0 $((RADIO_NUM - 1))); do
