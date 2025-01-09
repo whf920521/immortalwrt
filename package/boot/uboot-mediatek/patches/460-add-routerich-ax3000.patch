@@ -108,6 +108,7 @@
 +CONFIG_MTK_SPIM=y
 +CONFIG_ZSTD=y
 +CONFIG_HEXDUMP=y
++CONFIG_LMB_MAX_REGIONS=64
 --- /dev/null
 +++ b/arch/arm/dts/mt7981-routerich_ax3000.dts
 @@ -0,0 +1,187 @@
