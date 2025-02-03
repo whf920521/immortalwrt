@@ -96,7 +96,6 @@
 
 &dp3 {
 	status = "okay";
-
 	phy-handle = <&qca8072_4>;
 	label = "lan";
 };
@@ -141,7 +140,6 @@
 
 	nand@0 {
 		reg = <0>;
-
 		nand-ecc-strength = <4>;
 		nand-ecc-step-size = <512>;
 		nand-bus-width = <8>;

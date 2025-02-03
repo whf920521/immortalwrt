@@ -213,14 +213,14 @@
 
 &dp5 {
 	status = "okay";
-	label = "lan";
 	phy-handle = <&qca8081_24>;
+	label = "lan";
 };
 
 &dp6 {
 	status = "okay";
-	label = "wan";
 	phy-handle = <&qca8081_28>;
+	label = "wan";
 };
 
 &wifi {

@@ -90,7 +90,6 @@
 
 	nand@0 {
 		reg = <0>;
-
 		nand-ecc-strength = <4>;
 		nand-ecc-step-size = <512>;
 		nand-bus-width = <8>;
@@ -188,11 +187,6 @@
 	status = "okay";
 	phy-handle = <&qca8075_4>;
 	label = "wan";
-};
-
-&wifi {
-	status = "okay";
-	qcom,ath11k-fw-memory-mode = <1>;
 };
 
 &edma {

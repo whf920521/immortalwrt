@@ -288,11 +288,6 @@
 	nvmem-cell-names = "mac-address";
 };
 
-&wifi {
-	status = "okay";
-	qcom,ath11k-fw-memory-mode = <1>;
-};
-
 &edma {
 	status = "okay";
 };
