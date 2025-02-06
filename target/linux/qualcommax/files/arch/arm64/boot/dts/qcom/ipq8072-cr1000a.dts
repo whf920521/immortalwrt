@@ -196,14 +196,14 @@
 
 &dp5_syn {
 	status = "okay";
-	label = "lan";
 	phy-handle = <&rtl9301>;
+	label = "lan";
 };
 
 &dp6_syn {
 	status = "okay";
-	label = "wan";
 	phy-handle = <&aqr113c>;
+	label = "wan";
 };
 
 &pcie0 {

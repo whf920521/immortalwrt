@@ -171,30 +171,30 @@
 };
 
 &dp2 {
+	status = "okay";
 	phy-mode = "qsgmii";
 	phy-handle = <&qca8075_1>;
 	label = "lan3";
-	status = "okay";
 };
 
 &dp3 {
+	status = "okay";
 	phy-mode = "qsgmii";
 	phy-handle = <&qca8075_2>;
 	label = "lan2";
-	status = "okay";
 };
 
 &dp4 {
+	status = "okay";
 	phy-mode = "qsgmii";
 	phy-handle = <&qca8075_3>;
 	label = "lan1";
-	status = "okay";
 };
 
 &dp6_syn {
+	status = "okay";
 	phy-handle = <&qca8081>;
 	label = "wan";
-	status = "okay";
 };
 
 &wifi {
