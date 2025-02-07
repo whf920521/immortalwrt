@@ -54,7 +54,7 @@ Changes in v2:
 
 --- a/arch/arm64/boot/dts/qcom/ipq6018.dtsi
 +++ b/arch/arm64/boot/dts/qcom/ipq6018.dtsi
-@@ -643,6 +643,20 @@
+@@ -656,6 +656,20 @@
  			status = "disabled";
  		};
  

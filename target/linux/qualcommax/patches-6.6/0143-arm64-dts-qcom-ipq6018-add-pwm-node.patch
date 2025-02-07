@@ -1,3 +1,4 @@
+@ -1,187 +0,0 @@
 From patchwork Thu Oct  5 16:05:50 2023
 Content-Type: text/plain; charset="utf-8"
 MIME-Version: 1.0
@@ -162,7 +163,7 @@ v3: s/qcom,pwm-ipq6018/qcom,ipq6018-pwm/ (Rob Herring)
 
 --- a/arch/arm64/boot/dts/qcom/ipq6018.dtsi
 +++ b/arch/arm64/boot/dts/qcom/ipq6018.dtsi
-@@ -477,8 +477,21 @@
+@@ -453,8 +453,21 @@
  		};
  
  		tcsr: syscon@1937000 {
