@@ -1,25 +1,5 @@
 // SPDX-License-Identifier: GPL-2.0-or-later OR MIT
 
-&CPU0 {
-	/delete-property/ cpu-supply;
-};
-
-&CPU1 {
-	/delete-property/ cpu-supply;
-};
-
-&CPU2 {
-	/delete-property/ cpu-supply;
-};
-
-&CPU3 {
-	/delete-property/ cpu-supply;
-};
-
-&rpm {
-	status = "disabled";
-};
-
 &blsp1_uart3 {
 	status = "okay";
 	pinctrl-0 = <&serial_3_pins>;
