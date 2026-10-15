@@ -731,6 +731,11 @@ static void ppe_flow_age_timer_set(struct qca_ppe_priv *priv, u32 *ctrl)
 
 void ppe_flow_init(struct qca_ppe_priv *priv)
 {
+	static const u8 header_exceptions[] = {
+		PPE_EXCEP_IPV4_OPTION,
+		PPE_EXCEP_IPV6_EXT_HDR,
+		PPE_EXCEP_IPV6_MORE_EXT_HDR,
+	};
 	unsigned long trap = PPE_FLOW_TCP_TRAP;
 	int type, dir, bit, n;
 	u32 ctrl;
@@ -756,6 +761,20 @@ void ppe_flow_init(struct qca_ppe_priv *priv)
 			       << (dir * PPE_FLOW_CTRL1_DIR_BITS);
 
 		regmap_write(priv->regmap, PPE_FLOW_CTRL1(type), val);
+	}
+
+	/* Special IP headers need the stack's option and extension handling.
+	 * Trap before flow editing, including when a plain packet has already
+	 * installed the same tuple. Edited WLAN service frames cannot safely
+	 * recover these headers after a hardware lookup.
+	 */
+	for (type = 0; type < ARRAY_SIZE(header_exceptions); type++) {
+		u32 e = header_exceptions[type];
+
+		regmap_write(priv->regmap, PPE_L3_EXCEP_CMD(e),
+			     FIELD_PREP(PPE_L3_EXCEP_ACTION,
+					PPE_L3_EXCEP_RDT_TO_CPU));
+		regmap_write(priv->regmap, PPE_L3_EXCEP_L3_FLOW_EN(e), 1);
 	}
 
 	/* A FIN or RST that hits a flow is redirected to the CPU, so the

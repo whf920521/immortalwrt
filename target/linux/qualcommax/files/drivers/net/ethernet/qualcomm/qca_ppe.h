@@ -738,6 +738,9 @@
  * raised at all for a packet that hit a routed flow entry.
  */
 #define PPE_EXCEP_TCP_FLAGS(n)		(46 + (n))
+#define PPE_EXCEP_IPV4_OPTION		6
+#define PPE_EXCEP_IPV6_EXT_HDR		25
+#define PPE_EXCEP_IPV6_MORE_EXT_HDR	32
 /* The TCP flags trapped from offloaded flows, one pattern each. */
 #define PPE_FLOW_TCP_TRAP		(TCPHDR_FIN | TCPHDR_RST)
 #define PPE_L3_EXCEP_CMD(e)		(PPE_L3_BASE + 0x544 + (e) * 0x4)
