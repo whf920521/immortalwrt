@@ -17,8 +17,8 @@
 	aliases {
 		led-boot = &led_status_orange;
 		led-failsafe = &led_status_orange;
-		led-running = &led_status_orange;
-		led-upgrade = &led_status_orange;
+		led-running = &led_status_white;
+		led-upgrade = &led_status_white;
 	};
 
 	chosen {
@@ -55,14 +55,12 @@
 			color = <LED_COLOR_ID_ORANGE>;
 			function = LED_FUNCTION_STATUS;
 			gpios = <&tlmm 32 GPIO_ACTIVE_HIGH>;
-			default-state = "on";
 		};
 
 		led_status_white: status-white {
 			color = <LED_COLOR_ID_WHITE>;
 			function = LED_FUNCTION_STATUS;
 			gpios = <&tlmm 30 GPIO_ACTIVE_HIGH>;
-			default-state = "off";
 		};
 	};
 };
