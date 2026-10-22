@@ -46,10 +46,6 @@ define Build/an7581-chainloader
   cat $(STAGING_DIR_IMAGE)/an7581_$1-chainload-u-boot.itb >> $@
 endef
 
-AIROHA_USB_STORAGE_PACKAGES := \
-  block-mount kmod-usb-storage kmod-usb-storage-uas \
-  kmod-fs-ext4 kmod-fs-vfat kmod-fs-exfat
-
 define Device/FitImageLzma
 	KERNEL_SUFFIX := -uImage.itb
 	KERNEL = kernel-bin | lzma | fit lzma $$(KDIR)/image-$$(DEVICE_DTS).dtb

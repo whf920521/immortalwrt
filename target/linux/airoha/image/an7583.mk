@@ -48,7 +48,8 @@ define Device/nokia_xg-040g-mf-common
   DEVICE_PACKAGES := kmod-phy-airoha-en8811h \
 	kmod-regulator-userspace-consumer kmod-usb-ledtrig-usbport \
 	kmod-airoha-en7572 kmod-airoha-xpon airoha-ponctl airoha-pond \
-	luci-app-pon luci-i18n-pon-zh-cn i2c-tools
+	luci-app-pon luci-i18n-pon-zh-cn i2c-tools \
+	$(AIROHA_USB_STORAGE_PACKAGES)
 endef
 
 define Device/nokia_xg-040g-mf
