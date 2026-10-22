@@ -774,20 +774,6 @@ endef
 $(eval $(call KernelPackage,sched-act-gate))
 
 
-define KernelPackage/sched-act-pedit
-  SUBMENU:=$(NETWORK_SUPPORT_MENU)
-  TITLE:=Traffic Packet Editing
-  DEPENDS:=+kmod-sched-core
-  KCONFIG:=CONFIG_NET_ACT_PEDIT
-  FILES:=$(LINUX_DIR)/net/sched/act_pedit.ko
-  AUTOLOAD:=$(call AutoProbe,act_pedit)
-endef
-
-define KernelPackage/sched-act-pedit/description
- Allows to configure rules to rewrite header fields, such as the DSCP.
-endef
-
-$(eval $(call KernelPackage,sched-act-pedit))
 
 
 define KernelPackage/sched-act-police
@@ -972,20 +958,6 @@ endef
 $(eval $(call KernelPackage,sched-etf))
 
 
-define KernelPackage/sched-ets
-  SUBMENU:=$(NETWORK_SUPPORT_MENU)
-  TITLE:=Enhanced Transmission Selection scheduler
-  DEPENDS:=+kmod-sched-core
-  KCONFIG:=CONFIG_NET_SCH_ETS
-  FILES:=$(LINUX_DIR)/net/sched/sch_ets.ko
-  AUTOLOAD:=$(call AutoProbe,sch_ets)
-endef
-
-define KernelPackage/sched-ets/description
- Strict priority and weighted round-robin bands, offloadable to a switch.
-endef
-
-$(eval $(call KernelPackage,sched-ets))
 
 
 define KernelPackage/sched-flower
