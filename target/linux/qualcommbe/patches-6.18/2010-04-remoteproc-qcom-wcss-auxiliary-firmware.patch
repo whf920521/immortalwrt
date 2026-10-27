@@ -4,7 +4,8 @@ Subject: [PATCH] remoteproc: qcom: load auxiliary WCSS firmware and describe its
 
 Keep firmware-name array validation, auxiliary image loading and the secure WCSS device-tree interface together.
 
-Split-from: 2010-02-remoteproc-qcom-secure-wcss-startup-signaling.patch
+Split from:
+  2010-02-remoteproc-qcom-secure-wcss-startup-signaling.patch
 
 Merged from:
   2010-05-remoteproc-qcom-wcss-sec-load-auxiliary-firmware.patch

@@ -4,7 +4,8 @@ Subject: [PATCH] remoteproc: qcom: distinguish Q6 crash wakeups from acknowledge
 
 Read crash reasons from the correct SMEM host and propagate boot/shutdown acknowledgement state through all Q6 consumers.
 
-Split-from: 2010-02-remoteproc-qcom-secure-wcss-startup-signaling.patch
+Split from:
+  2010-02-remoteproc-qcom-secure-wcss-startup-signaling.patch
 
 Merged from:
   2010-02-remoteproc-qcom-q6v5-read-crash-reason-from-remote-smem.patch

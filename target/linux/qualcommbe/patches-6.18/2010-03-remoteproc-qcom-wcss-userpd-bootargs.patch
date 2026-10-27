@@ -4,7 +4,8 @@ Subject: [PATCH] remoteproc: qcom: prepare UserPD boot metadata before loading W
 
 Keep validated ELF metadata, the MDT file-size API and shared-memory UserPD boot arguments in one firmware-startup unit.
 
-Split-from: 2010-02-remoteproc-qcom-secure-wcss-startup-signaling.patch
+Split from:
+  2010-02-remoteproc-qcom-secure-wcss-startup-signaling.patch
 Original-patch: 2010-03-remoteproc-qcom-wcss-refresh-userpd-bootargs.patch
 
 Signed-off-by: ViKing <viking.yfy@qq.com>

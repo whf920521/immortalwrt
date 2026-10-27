@@ -4,7 +4,8 @@ Subject: [PATCH] net: ethernet: qualcomm: register the AX EDMA dataplane
 
 Keep the EDMA driver and page-pool dependency separate from switch registration.
 
-Split-from: 0952-net-qca-ppe-edma-registration.patch
+Split from:
+  0952-net-qca-ppe-edma-registration.patch
 Original-patch: 0953-net-ethernet-qca-add-EDMA.patch
 
 Signed-off-by: ViKing <viking.yfy@qq.com>
