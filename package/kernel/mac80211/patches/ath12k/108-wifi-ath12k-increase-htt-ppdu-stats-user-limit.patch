@@ -1,4 +1,4 @@
-From: Hariharan Ramanathan <quic_hramanat@quicinc.com>
+From: ViKing <viking.yfy@qq.com>
 Date: Tue, 15 Apr 2025 18:45:34 +0530
 Subject: [PATCH] wifi: ath12k: increase HTT PPDU stats user limit
 
@@ -17,6 +17,8 @@ Signed-off-by: Hariharan Ramanathan <quic_hramanat@quicinc.com>
  drivers/net/wireless/ath/ath12k/dp_htt.h | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
+Original-author: Hariharan Ramanathan <quic_hramanat@quicinc.com>
+Signed-off-by: ViKing <viking.yfy@qq.com>
 --- a/drivers/net/wireless/ath/ath12k/dp_htt.h
 +++ b/drivers/net/wireless/ath/ath12k/dp_htt.h
 @@ -1279,7 +1279,7 @@ struct htt_ppdu_user_stats {
