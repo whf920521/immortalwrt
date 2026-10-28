@@ -1,5 +1,5 @@
 From 43c521c11ce8fe904e14d1ae0566ffea931cf2e9 Mon Sep 17 00:00:00 2001
-From: Pavankumar Nandeshwar <pavankumar.nandeshwar@oss.qualcomm.com>
+From: ViKing <viking.yfy@qq.com>
 Date: Thu, 23 Jul 2026 11:16:53 +0530
 Subject: [PATCH] wifi: ath12k: skip MLO multicast links during crash recovery
  in Tx path
@@ -31,9 +31,11 @@ Signed-off-by: Jeff Johnson <jeff.johnson@oss.qualcomm.com>
  drivers/net/wireless/ath/ath12k/wifi7/hw.c | 3 +++
  1 file changed, 3 insertions(+)
 
+Original-author: Pavankumar Nandeshwar <pavankumar.nandeshwar@oss.qualcomm.com>
+Signed-off-by: ViKing <viking.yfy@qq.com>
 --- a/drivers/net/wireless/ath/ath12k/wifi7/hw.c
 +++ b/drivers/net/wireless/ath/ath12k/wifi7/hw.c
-@@ -1043,6 +1043,9 @@ static void ath12k_wifi7_mac_op_tx(struc
+@@ -1043,6 +1043,9 @@
  				continue;
  
  			tmp_ar = tmp_arvif->ar;
