@@ -5,6 +5,10 @@ Subject: [PATCH] net: ethernet: qualcomm: provide PPE phylink and MAC port opera
 Consolidate consecutive changes within this functional responsibility.
 Retain the final implementation and its error handling directly.
 
+Allow egress L2 MTU checks to include the two supported VLAN tag slots.
+Keep ingress MRU and routing/flow IP MTUs unchanged so tagged packets
+with a full-sized IP payload are not dropped after next-hop insertion.
+
 Merged from:
   0327-net-ethernet-qualcomm-Add-phylink-support-for-PPE-MA.patch
   0328-net-ethernet-qualcomm-Add-PPE-port-MAC-MIB-statistic.patch
@@ -95,7 +99,7 @@ Signed-off-by: ViKing <viking.yfy@qq.com>
  };
 --- /dev/null
 +++ b/drivers/net/ethernet/qualcomm/ppe/ppe_port.c
-@@ -0,0 +1,1312 @@
+@@ -0,0 +1,1318 @@
 +// SPDX-License-Identifier: GPL-2.0-only
 +/*
 + * Copyright (c) 2024 Qualcomm Innovation Center, Inc. All rights reserved.
@@ -104,6 +108,7 @@ Signed-off-by: ViKing <viking.yfy@qq.com>
 +/* PPE Port MAC initialization and PPE port MAC functions. */
 +
 +#include <linux/clk.h>
++#include <linux/if_vlan.h>
 +#include <linux/of_net.h>
 +#include <linux/pcs/pcs-qcom-ipq9574.h>
 +#include <linux/phylink.h>
@@ -649,17 +654,22 @@ Signed-off-by: ViKing <viking.yfy@qq.com>
 +	struct ppe_device *ppe_dev = ppe_port->ppe_dev;
 +	u32 reg, val, mru_mtu_val[3];
 +	int port = ppe_port->port_id;
++	int tx_frame_size;
 +	int ret;
 +
-+	/* The max frame size should be MTU added by ETH_HLEN in PPE. */
++	/* Keep ingress MRU at the IP MTU plus the Ethernet header.  Egress
++	 * L2 MTU checking also counts VLAN headers inserted by the next hop.
++	 * Reserve both supported tag slots without changing the L3/flow MTU.
++	 */
 +	maxframe_size += ETH_HLEN;
++	tx_frame_size = maxframe_size + 2 * VLAN_HLEN;
 +
 +	/* MAC takes cover the FCS for the calculation of frame size. */
-+	if (maxframe_size > PPE_PORT_MAC_MAX_FRAME_SIZE - ETH_FCS_LEN)
++	if (tx_frame_size > PPE_PORT_MAC_MAX_FRAME_SIZE - ETH_FCS_LEN)
 +		return -EINVAL;
 +
 +	reg = PPE_MC_MTU_CTRL_TBL_ADDR + PPE_MC_MTU_CTRL_TBL_INC * port;
-+	val = FIELD_PREP(PPE_MC_MTU_CTRL_TBL_MTU, maxframe_size);
++	val = FIELD_PREP(PPE_MC_MTU_CTRL_TBL_MTU, tx_frame_size);
 +	ret = regmap_update_bits(ppe_dev->regmap, reg,
 +				 PPE_MC_MTU_CTRL_TBL_MTU,
 +				 val);
@@ -673,7 +683,7 @@ Signed-off-by: ViKing <viking.yfy@qq.com>
 +		return ret;
 +
 +	PPE_MRU_MTU_CTRL_SET_MRU(mru_mtu_val, maxframe_size);
-+	PPE_MRU_MTU_CTRL_SET_MTU(mru_mtu_val, maxframe_size);
++	PPE_MRU_MTU_CTRL_SET_MTU(mru_mtu_val, tx_frame_size);
 +
 +	return regmap_bulk_write(ppe_dev->regmap, reg,
 +				 mru_mtu_val, ARRAY_SIZE(mru_mtu_val));

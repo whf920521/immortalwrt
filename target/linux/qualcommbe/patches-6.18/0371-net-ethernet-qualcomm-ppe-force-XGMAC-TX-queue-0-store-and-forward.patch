@@ -1,4 +1,4 @@
-From: Til Kaiser <mail@tk154.de>
+From: ViKing <viking.yfy@qq.com>
 Date: Mon, 18 May 2026 00:00:00 +0200
 Subject: [PATCH] net: ethernet: qualcomm: ppe: force XGMAC TX queue 0 store-and-forward
 
@@ -13,9 +13,11 @@ Signed-off-by: Til Kaiser <mail@tk154.de>
  drivers/net/ethernet/qualcomm/ppe/ppe_regs.h | 3 +++
  2 files changed, 11 insertions(+)
 
+Original-author: Til Kaiser <mail@tk154.de>
+Signed-off-by: ViKing <viking.yfy@qq.com>
 --- a/drivers/net/ethernet/qualcomm/ppe/ppe_port.c
 +++ b/drivers/net/ethernet/qualcomm/ppe/ppe_port.c
-@@ -903,6 +903,15 @@ static int ppe_port_xgmac_link_up(struct
+@@ -909,6 +909,15 @@
  	}
  
  	reg = PPE_PORT_XGMAC_ADDR(port);
