@@ -1,9 +1,16 @@
-From: ViKing <viking.yfy@qq.com>
-Date: Tue, 27 Oct 2026 09:40:00 +0800
+From: Kenneth Kasilag <kenneth@kasilag.me>
+Date: Wed, 28 Oct 2026 13:34:14 +0800
 Subject: [PATCH] net: ethernet: qualcomm: implement L3 hardware flow tables
 
-Consolidate consecutive changes within this functional responsibility.
-Retain the final implementation and its error handling directly.
+Add the register and table layouts of the PPE L3 flow engine, taken from
+the SSDK: the router MAC table, the ingress and egress L3 interface tables,
+the public NAT address table, the next hop table, the flow and host tables
+with their independent operation registers, the per-flow hit counters, and
+the flow control registers holding the lookup enable and the hardware flow
+aging timer.
+
+Add the low level accessors of the PPE L3 flow engine, in preparation for
+offloading netfilter flowtables.
 Program default physical-port frame limits before registering the netdev,
 including when userspace leaves the default IP MTU unchanged.
 
@@ -14,6 +21,7 @@ Merged from:
 Based on work by:
   Kenneth Kasilag <kenneth@kasilag.me>
 
+Signed-off-by: Kenneth Kasilag <kenneth@kasilag.me>
 Signed-off-by: ViKing <viking.yfy@qq.com>
 
 --- a/drivers/net/ethernet/qualcomm/ppe/Makefile

@@ -1,9 +1,18 @@
-From: ViKing <viking.yfy@qq.com>
-Date: Tue, 27 Oct 2026 09:40:00 +0800
+From: Lei Wei <quic_leiwei@quicinc.com>
+Date: Wed, 28 Oct 2026 13:34:14 +0800
 Subject: [PATCH] net: ethernet: qualcomm: provide PPE phylink and MAC port operations
 
-Consolidate consecutive changes within this functional responsibility.
-Retain the final implementation and its error handling directly.
+Add MAC initialization and phylink functions for PPE MAC ports.
+
+Add PPE port MAC MIB statistics functions which are used by netdev ops and
+ethtool. For GMAC, a polling task is scheduled to read the MIB counters
+periodically to avoid 32bit register counter overflow.
+
+Add PPE port MAC address set and EEE set API functions which will be used
+by netdev ops and ethtool.
+
+This function is called when the MTU of an ethernet port is configured. It
+limits the size of packet passed through the ethernet port.
 
 Allow egress L2 MTU checks to include the two supported VLAN tag slots.
 Keep ingress MRU and routing/flow IP MTUs unchanged so tagged packets
@@ -25,6 +34,9 @@ Original-commit: 9ecd759aafd85b92ac2865748ea62af8211bce74
 Original-commit: 15e70eb335652f61fdf1b645736f7782b88368c0
 Original-commit: e2f7ca2d156a194b20af7532c494360013c1603e
 
+Signed-off-by: Lei Wei <quic_leiwei@quicinc.com>
+Signed-off-by: Alexandru Gagniuc <mr.nuke.me@gmail.com>
+Signed-off-by: Luo Jie <quic_luoj@quicinc.com>
 Signed-off-by: ViKing <viking.yfy@qq.com>
 
 --- a/drivers/net/ethernet/qualcomm/Kconfig

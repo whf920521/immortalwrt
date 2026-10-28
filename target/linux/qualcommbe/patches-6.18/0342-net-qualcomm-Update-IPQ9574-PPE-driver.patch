@@ -1,17 +1,19 @@
 From a355002e08a1db55eec93f469d28cfaab7b60f4b Mon Sep 17 00:00:00 2001
-From: ViKing <viking.yfy@qq.com>
-Date: Thu, 22 May 2025 11:16:12 +0800
+From: Luo Jie <quic_luoj@quicinc.com>
+Date: Wed, 28 Oct 2026 13:34:14 +0800
 Subject: [PATCH] net: qualcomm: Update IPQ9574 PPE driver
 
 Update PPE driver to keep aligned with the upstream patches. The
 updated PPE driver also fix some known issues such as GRO/GSO/TSO
 issue for the performance improvement.
 
-Signed-off-by: Luo Jie <quic_luoj@quicinc.com>
 Alex G: print error code when failing to connect phylink
-Signed-off-by: Alexandru Gagniuc <mr.nuke.me@gmail.com>
 Balsam CHIHI: route 1000BASE-X to GMII clock helper for 1G SFP support
+
+Signed-off-by: Luo Jie <quic_luoj@quicinc.com>
+Signed-off-by: Alexandru Gagniuc <mr.nuke.me@gmail.com>
 Signed-off-by: Balsam CHIHI <balsam.chihi@moment.tech>
+Signed-off-by: ViKing <viking.yfy@qq.com>
 ---
  drivers/net/ethernet/qualcomm/ppe/Makefile    |   2 +-
  drivers/net/ethernet/qualcomm/ppe/edma.c      | 158 +---
@@ -40,9 +42,6 @@ Signed-off-by: Balsam CHIHI <balsam.chihi@moment.tech>
  24 files changed, 889 insertions(+), 757 deletions(-)
  create mode 100644 drivers/net/ethernet/qualcomm/ppe/ppe_api.c
  create mode 100644 drivers/net/ethernet/qualcomm/ppe/ppe_api.h
-
-Original-author: Luo Jie <quic_luoj@quicinc.com>
-Signed-off-by: ViKing <viking.yfy@qq.com>
 --- a/drivers/net/ethernet/qualcomm/ppe/Makefile
 +++ b/drivers/net/ethernet/qualcomm/ppe/Makefile
 @@ -4,7 +4,7 @@

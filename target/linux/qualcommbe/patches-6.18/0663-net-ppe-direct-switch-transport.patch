@@ -1,5 +1,5 @@
-From: ViKing <viking.yfy@qq.com>
-Date: Tue, 27 Oct 2026 09:40:00 +0800
+From: JiaY-shi <shi05275@163.com>
+Date: Wed, 28 Oct 2026 13:34:14 +0800
 Subject: [PATCH] net: ethernet: qualcomm: implement Direct Switch ring transport
 
 Batch uplink completion interrupts with the bounded index/refill poll timer.
@@ -19,6 +19,7 @@ Based on work by:
 Link: https://git.codelinaro.org/clo/qsdk/oss/lklm/nss-dp/-/tree/23928147cfb6f55638cc0a27f700831623ed679c
 Link: https://git.codelinaro.org/clo/qsdk/oss/lklm/nss-ppe/-/tree/d53eff24bf257a8bb1b2f68beb3aa06332bfd567
 
+Signed-off-by: JiaY-shi <shi05275@163.com>
 Signed-off-by: ViKing <viking.yfy@qq.com>
 
 --- a/arch/arm64/boot/dts/qcom/ipq5332.dtsi
