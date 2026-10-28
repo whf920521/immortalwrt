@@ -1,5 +1,5 @@
-From: ViKing <viking.yfy@qq.com>
-Date: Thu, 27 Aug 2026 18:20:00 +0800
+From: JiaY-shi <shi05275@163.com>
+Date: Wed, 28 Oct 2026 13:34:14 +0800
 Subject: [PATCH] wifi: ath12k: prefer discrete radio as MLO primary
 
 Qualcomm's driver marks IPQ5332 as unsuitable for automatic primary-link
@@ -20,9 +20,8 @@ primary after association because this backport does not include TIP's live
 UMAC migration machinery.
 
 Signed-off-by: JiaY-shi <shi05275@163.com>
----
-Original-author: JiaY-shi <shi05275@163.com>
 Signed-off-by: ViKing <viking.yfy@qq.com>
+---
 --- a/drivers/net/wireless/ath/ath12k/peer.c
 +++ b/drivers/net/wireless/ath/ath12k/peer.c
 @@ -331,8 +331,8 @@

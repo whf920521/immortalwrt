@@ -1,9 +1,28 @@
-From: ViKing <viking.yfy@qq.com>
-Date: Tue, 27 Oct 2026 09:40:00 +0800
+From: Baochen Qiang <baochen.qiang@oss.qualcomm.com>
+Date: Wed, 28 Oct 2026 13:34:14 +0800
 Subject: [PATCH] wifi: ath12k: synchronize MLO peer links and deletion lifetime
 
-Consolidate consecutive changes within this functional responsibility.
-Retain the final implementation and its error handling directly.
+ath12k_mac_vdev_create() for an AP vdev creates the bss self-peer via
+ath12k_peer_create(), which finishes by calling
+ath12k_dp_link_peer_assign() to publish the dp_link_peer in the
+dp_hw->dp_peers[peerid_index] RCU table, in the dp_peer's link_peers[]
+array, and in the per-addr rhashtable.
+
+ath12k_peer_mlo_link_peers_delete() sends WMI peer_delete for every link
+before waiting for any peer_unmap / peer_delete_resp event. The shared per-
+radio completion ar->peer_delete_done could not disambiguate which peer a
+response was for: every call to ath12k_peer_delete_send() did
+reinit_completion(&ar->peer_delete_done), so when an event for the first
+link arrived between two sends it raised the count to 1 and the second send
+promptly cleared it; the wait for the second link then timed out with
+
+The TX control link field can contain zero for MLD frames even when link
+zero is not part of the VIF. ath12k treats that value as an explicit link,
+fails to find an arvif and drops the frame.
+
+The ahvif link pointer array is protected by RCU whereas links_map is not.
+During link removal, clearing a link pointer before links_map leaves a
+window where readers see the old bitmap but dereference a NULL arvif.
 
 Merged from:
   111-wifi-ath12k-fix-dp-link-peer-dangling-references.patch
@@ -23,6 +42,10 @@ Original-commit: 01cc0f59aac3574b6a7b02493a76bc8ed0aa758f
 Link: https://patch.msgid.link/20260629-ath12k-mlo-peer-delete-race-v2-2-362b25590d19@oss.qualcomm.com
 Original-commit: 1d432d14045771fd5f92dade3bf2b7dc2d1085ad
 
+Signed-off-by: Baochen Qiang <baochen.qiang@oss.qualcomm.com>
+Signed-off-by: Jeff Johnson <jeff.johnson@oss.qualcomm.com>
+Signed-off-by: Akshay Kakatkar <me@kakatkarakshay.dev>
+Signed-off-by: Ramya Gnanasekar <rgnanase@qti.qualcomm.com>
 Signed-off-by: ViKing <viking.yfy@qq.com>
 
 --- a/drivers/net/wireless/ath/ath12k/core.c

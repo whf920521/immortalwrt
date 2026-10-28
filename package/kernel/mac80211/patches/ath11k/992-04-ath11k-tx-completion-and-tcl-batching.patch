@@ -1,9 +1,20 @@
 From: ViKing <viking.yfy@qq.com>
-Date: Tue, 27 Oct 2026 09:40:00 +0800
+Date: Wed, 28 Oct 2026 13:34:14 +0800
 Subject: [PATCH] wifi: ath11k: batch TX completions and TCL submissions
 
-Consolidate consecutive changes within this functional responsibility.
-Retain the final implementation and its error handling directly.
+The TX completion handler takes base_lock and searches the peer list for
+every frame, although consecutive completions mostly belong to one peer,
+and it frees each buffer on its own. Carry the peer's station and TX rate
+across one completion run and look them up again only when the peer ID
+changes. Collect the completed buffers on the status free list and free
+them with napi_consume_skb() at the end of the run.
+
+Each frame a TXQ hands over took the TCL ring lock twice, read the hardware
+tail pointer three times and wrote the head pointer once. Take the ring
+once for the whole dequeue run instead: read the free count at the start,
+queue the frames on that ring and write the head pointer after the last
+one. ath11k_dp_tx() takes the ring the caller holds and does not fall back
+to another ring while it is held.
 
 Merged from:
   992-15-wifi-ath11k-batch-TX-completion-frees-and-peer-lookups.patch
@@ -12,6 +23,7 @@ Merged from:
 Based on work by:
   Julius Bairaktaris <julius@bairaktaris.de>
 
+Signed-off-by: Julius Bairaktaris <julius@bairaktaris.de>
 Signed-off-by: ViKing <viking.yfy@qq.com>
 
 --- a/drivers/net/wireless/ath/ath11k/mac.c

@@ -1,6 +1,6 @@
 From e47d6c9bb4165721f61356f5fccae8f7dd78876b Mon Sep 17 00:00:00 2001
-From: ViKing <viking.yfy@qq.com>
-Date: Tue, 23 Jun 2026 15:35:01 +0530
+From: Tamizh Chelvam Raja <tamizh.raja@oss.qualcomm.com>
+Date: Wed, 28 Oct 2026 13:34:14 +0800
 Subject: [PATCH] wifi: ath12k: Advertise multicast Ethernet encapsulation
  offload support
 
@@ -21,18 +21,17 @@ These frames are already in Ethernet format and do not require
 
 Tested-on: QCN9274 hw2.0 PCI WLAN.WBE.1.6-01243-QCAHKSWPL_SILICONZ-1
 
-Signed-off-by: Tamizh Chelvam Raja <tamizh.raja@oss.qualcomm.com>
 Reviewed-by: Rameshkumar Sundaram <rameshkumar.sundaram@oss.qualcomm.com>
 Reviewed-by: Baochen Qiang <baochen.qiang@oss.qualcomm.com>
 Link: https://patch.msgid.link/20260623100501.2100119-1-tamizh.raja@oss.qualcomm.com
+
+Signed-off-by: Tamizh Chelvam Raja <tamizh.raja@oss.qualcomm.com>
 Signed-off-by: Jeff Johnson <jeff.johnson@oss.qualcomm.com>
+Signed-off-by: ViKing <viking.yfy@qq.com>
 ---
  drivers/net/wireless/ath/ath12k/mac.c      |  6 ++-
  drivers/net/wireless/ath/ath12k/wifi7/hw.c | 61 +++++++++++++++++-----
  2 files changed, 53 insertions(+), 14 deletions(-)
-
-Original-author: Tamizh Chelvam Raja <tamizh.raja@oss.qualcomm.com>
-Signed-off-by: ViKing <viking.yfy@qq.com>
 --- a/drivers/net/wireless/ath/ath12k/wifi7/hw.c
 +++ b/drivers/net/wireless/ath/ath12k/wifi7/hw.c
 @@ -918,6 +918,7 @@

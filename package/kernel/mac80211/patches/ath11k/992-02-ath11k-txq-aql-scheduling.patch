@@ -1,9 +1,87 @@
 From: ViKing <viking.yfy@qq.com>
-Date: Tue, 27 Oct 2026 09:40:00 +0800
+Date: Wed, 28 Oct 2026 13:34:14 +0800
 Subject: [PATCH] wifi: ath11k: implement airtime-aware TXQ scheduling and completion budgets
 
-Consolidate consecutive changes within this functional responsibility.
-Retain the final implementation and its error handling directly.
+Under heavy traffic, ath11k experiences frequent -ENOMEM errors ("failed to
+transmit frame -12") when the hardware TCL ring fills up. This issue is
+more commonly observed in VMs with PCIe passthrough but also occurs on bare
+metal systems. It is particularly problematic on devices with a single
+shared TCL ring where all traffic classes compete for the same 512
+descriptor slots.
+
+ath11k_dp_tx_free_txbuf(), reached for the HTT REINJ and INSPECT statuses,
+frees the frame with dev_kfree_skb_any(), unlike every other tx completion
+path in dp_tx.c, and so does ath11k_dp_free() for the frames in flight when
+firmware recovery tears the rings down. This leaks the tx status clone and
+idr entry mac80211 keeps for a frame whose socket asked for status, as
+commit 29d15589f084 ("wifi: ath11k: Cleanup mac80211 references on failure
+during tx_complete") fixed on three sibling paths. With
+NL80211_EXT_FEATURE_AQL, set by the next patch, it also keeps the frame's
+airtime charge, which ieee80211_restart_hw() does not reset, and an access
+category at its limit is never scheduled again.
+
+Without NL80211_EXT_FEATURE_AQL, mac80211 applies no airtime queue limit,
+and a saturated download moves every queued frame into the hardware TX
+rings. Set the bit. mac80211 estimates each frame's airtime from the rate
+ath11k reports through ieee80211_tx_status_ext(), and charges its 4 us
+floor while that rate is unset. Only the PPDU stats set it, so single pdev
+chips, which take the rate from the tx completion instead, would stay at
+the floor; set it there as well.
+
+Nothing shows ar->dp.num_tx_pending, the MSDUs the hardware has not
+completed. Print it per radio in soc_dp_stats. Divided into the pending
+airtime in a station's aql file, it gives the airtime AQL charges per MSDU.
+
+mac80211 charges the airtime deficit only through
+ieee80211_sta_register_airtime(), which ath11k never calls, so with
+NL80211_EXT_FEATURE_AIRTIME_FAIRNESS alone every station stays in credit.
+Register fes_duration_us from the PPDU stats, which ath11k already adds to
+arsta->tx_duration, and set the bit. The TID comes from the ack/BA status
+TLV, sent only for a PPDU that drew a response, then from the completion or
+rate TLV, then BE. Each user of a downlink MU PPDU is charged the whole
+duration, as arsta->tx_duration is; every PPDU on this hardware had one
+user. mac80211 takes only local->active_txq_lock[ac] inside the call, which
+runs under ar->data_lock and ab->base_lock.
+
+The wake_tx_queue handler serves only the txq mac80211 passes it, so there
+is no deficit round robin between stations. Run the round in the driver:
+walk the access category's active txqs with ieee80211_next_txq() and drain
+each through the TCL ring check until the airtime queue limit binds or the
+queue empties. A full ring ends the round, since all txqs of a round share
+it. Each round holds a per-category lock, as in ath10k, because mac80211
+forbids concurrent rounds on one category and the next patch also starts
+rounds from tx completion. The design was proposed for ath11k in [1].
+
+A station at its airtime queue limit gets airtime back only when the
+hardware completes its frames, but ath11k starts a round only from
+wake_tx_queue, so the backlog waits for the next frame from the stack.
+Start a round for each access category, taken from the frame's queue
+mapping, that a reaped completion belonged to, whether the hardware or the
+firmware released the frame.
+
+mac80211 charges received airtime to the same deficit, as AIRTIME_USE_RX is
+set by default, but ath11k reports none. Register each received PPDU's
+duration, which ath11k already adds to rx_duration, once against the PPDU's
+first TID, or BE when it names none. The TID comes from the PPDU end user
+stats TLV, which is added to the default monitor status filter. The call
+runs under ab->base_lock, as on the transmit side:
+ath11k_mac_op_sta_state() drops the station from its peer under that lock,
+and mac80211 frees it after that without an RCU grace period.
+
+ath11k_dp_tx() returns -ENOSPC when the MSDU idr is full and -ENOMEM when
+no TCL descriptor is free or a DMA mapping fails; it frees the frame, and
+the round then dequeues and frees the next frame of the same flow. End the
+round on those errors, leaving the frames behind queued; other errors
+concern only the frame. A category whose round ended this way or on a full
+TCL ring may have nothing of its own in flight, so mark it and start its
+round from the next tx completion on the device.
+
+ath11k_dp_tx_completion_handler() reaps the whole release ring, and
+ath11k_dp_service_srng() charges none of it against the NAPI budget, unlike
+the receive handlers. Since the handler now ends in a scheduling round, a
+full ring gets one round for all of it. Reap at most the budget per poll
+and return the count, so a round runs once per budget of completions; NAPI
+polls again at once for the rest.
 
 Merged from:
   992-03-wifi-ath11k-implement-custom-wake_tx_queue-with-flow-control.patch
@@ -24,6 +102,8 @@ Based on work by:
 Link: https://lore.kernel.org/all/20260917064825.12747-1-jtornosm@redhat.com/
 Link: https://lore.kernel.org/all/20230501130725.7171-1-quic_tamizhr@quicinc.com/ [1]
 
+Signed-off-by: Jose Ignacio Tornos Martinez <jtornosm@redhat.com>
+Signed-off-by: Julius Bairaktaris <julius@bairaktaris.de>
 Signed-off-by: ViKing <viking.yfy@qq.com>
 
 --- a/drivers/net/wireless/ath/ath11k/core.c
