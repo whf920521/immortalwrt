@@ -2917,8 +2917,8 @@ free:
 	return 0;
 }
 
-/* A firmware restart changes who owns WLAN forwarding. Retire the old
- * companions before their CPU-port destination can mean the host again.
+/* A firmware restart changes who receives CPU-port frames. Retire both
+ * firmware companions and flows that need the host EDMA transmit callback.
  */
 void ppe_flow_fw_purge(struct qca_ppe_priv *priv)
 {
@@ -2927,7 +2927,7 @@ void ppe_flow_fw_purge(struct qca_ppe_priv *priv)
 	guard(mutex)(&priv->flow_lock);
 	guard(mutex)(&priv->vlan_lock);
 	list_for_each_entry_safe(entry, tmp, &priv->flow_list, list)
-		if (entry->steer)
+		if (entry->steer || entry->xdev)
 			ppe_flow_drop(priv, entry);
 }
 
@@ -3580,6 +3580,16 @@ static int ppe_flow_offload_replace(struct ppe_flow_block *fb,
 				ret == -EBUSY ? PPE_REJECT_HAIRPIN :
 				PPE_REJECT_EGRESS_PORT);
 		goto err_ingress;
+	}
+
+	/* The NSS firmware owns CPU-port receive while it carries flows. It
+	 * does not return the EDMA flow index that ppe_flow_xmit() needs to
+	 * select an external device or a software shaper. Leave these flows
+	 * in software; only firmware companions can use that CPU-port path.
+	 */
+	if (entry->xdev && rcu_access_pointer(priv->fw_carries)) {
+		ret = ppe_flow_reject(priv, rule, PPE_REJECT_CPU_PATH);
+		goto err_egress;
 	}
 
 	ppe_flow_encode(&data, v6, snat, dnat, steer,

@@ -437,6 +437,7 @@ static const char * const ppe_flow_reject_name[] = {
 	[PPE_REJECT_ACTION]		= "unsupported_action",
 	[PPE_REJECT_L2]			= "no_egress_l2_header",
 	[PPE_REJECT_EGRESS_PORT]	= "egress_not_switch_port",
+	[PPE_REJECT_CPU_PATH]		= "cpu_path_unavailable",
 	[PPE_REJECT_HAIRPIN]		= "egress_is_ingress",
 	[PPE_REJECT_NAT_BOTH]		= "snat_and_dnat",
 	[PPE_REJECT_NAT_IPV6]		= "ipv6_nat",
@@ -455,7 +456,7 @@ static int ppe_offload_show(struct seq_file *s, void *data)
 
 	guard(mutex)(&priv->flow_lock);
 
-	seq_puts(s, "diagnostic_revision:r3\n");
+	seq_puts(s, "diagnostic_revision:r4\n");
 	seq_printf(s, "%-24s %u\n", "offloaded", priv->flow_offloaded);
 	seq_printf(s, "%-24s %u\n", "reinstalled", priv->flow_reinstalled);
 	seq_printf(s, "%-24s %u\n", "destroy_miss", priv->flow_destroy_miss);
