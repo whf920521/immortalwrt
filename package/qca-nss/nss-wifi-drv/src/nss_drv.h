@@ -569,6 +569,7 @@ void nss_flow_notify(const struct nss_cmn_msg *ncm, u32 len);
 void nss_flow_print(struct seq_file *s);
 int nss_flow_init(void);
 void nss_flow_exit(void);
+bool nss_redir_is_usb(const struct net_device *dev);
 bool nss_redir_bound(int ifindex);
 bool nss_redir_recv(struct nss_core *core, const struct n2h_descriptor *desc,
 		    struct sk_buff *skb);

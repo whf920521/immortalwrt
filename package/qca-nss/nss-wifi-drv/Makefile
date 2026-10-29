@@ -3,7 +3,7 @@ include $(INCLUDE_DIR)/kernel.mk
 
 PKG_NAME:=nss-wifi-drv
 PKG_VERSION:=20261029
-PKG_RELEASE:=2
+PKG_RELEASE:=3
 PKG_CONFIG_DEPENDS:=CONFIG_NSS_WIFI_DEBUG
 PKG_LICENSE:=GPL-2.0-only
 
@@ -35,8 +35,9 @@ endef
 
 define KernelPackage/nss-wifi-drv/description
   Boots the NSS firmware and speaks its message protocol, so the Wi-Fi
-  data plane runs on the NSS cores instead of the host. Carries only what
-  a Wi-Fi offload needs: the wired ports belong to qca_edma and qca_ppe.
+  data plane runs on the NSS cores instead of the host. Generic redirect
+  nodes also carry raw-IP and USB Ethernet devices through their host
+  drivers. The wired switch ports belong to qca_edma and qca_ppe.
 
   The module does not autoload: the nss-wifi service loads it and boots a
   core when nss-wifi.general.offload is 1, the default. The wired ports

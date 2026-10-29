@@ -6,7 +6,7 @@
  * a back end that refuses one leaves it for the others and for software. So
  * this is a second back end beside the switch's, and neither needs to know the
  * other exists: the switch declines a flow that did not arrive on one of its
- * ports, and this declines one with no wireless end.
+ * ports, and this declines one with no wireless or redirected end.
  *
  * The kernel offers the two directions of a connection separately and the
  * firmware wants a single rule carrying both. The two offers arrive one after
@@ -330,8 +330,8 @@ static bool nss_flow_is_wireless(int ifindex)
 	return dev && dev->ieee80211_ptr;
 }
 
-/* A connection this firmware may carry has a station or a modem at one end;
- * between two switch ports the switch carries it.
+/* A connection this firmware may carry has a station or a redirected device
+ * at one end; between two switch ports the switch carries it.
  */
 bool nss_flow_is_ours(int ifindex)
 {
@@ -977,7 +977,7 @@ static int nss_flow_replace(struct nss_core *core, struct flow_cls_offload *f)
 
 	e = rhashtable_lookup_fast(&nss_flow_table, &key, nss_flow_ht_params);
 	if (!e) {
-		/* Only a connection a station or a modem is one end of
+		/* Only a connection a station or a redirected device is one end of
 		 * belongs here. The switch carries everything else, and a
 		 * flow claimed by both would be forwarded twice. Either
 		 * direction may be that end, and the offer in hand names only
@@ -1410,8 +1410,8 @@ void nss_flow_withdraw_dev(const struct net_device *dev)
 }
 
 /* Take the flow table's block on @dev. A wireless device's driver forwards
- * the offer from its own traffic-control entry point; a raw-IP device has
- * none, and the offer arrives through the indirect callback with @cleanup.
+ * the offer from its own traffic-control entry point; raw-IP and USB Ethernet
+ * devices use the indirect callback with @cleanup.
  */
 static int nss_flow_block(struct net_device *dev, struct flow_block_offload *f,
 			  struct Qdisc *sch, void *data,
@@ -1477,15 +1477,16 @@ int nss_flow_setup_block(struct net_device *dev, struct flow_block_offload *f)
 }
 EXPORT_SYMBOL_GPL(nss_flow_setup_block);
 
-/* Every raw-IP device is taken, paired or not: a core restart unpairs it for
- * a while, and whether the firmware reaches it is decided per connection.
+/* Take raw-IP and USB Ethernet devices whether paired or not: a core restart
+ * unpairs them for a while. Reachability is decided per connection.
  */
 static int nss_flow_indr_cb(struct net_device *dev, struct Qdisc *sch,
 			    void *cb_priv, enum tc_setup_type type,
 			    void *type_data, void *data,
 			    void (*cleanup)(struct flow_block_cb *block_cb))
 {
-	if (!dev || type != TC_SETUP_FT || dev->type != ARPHRD_RAWIP)
+	if (!dev || type != TC_SETUP_FT ||
+	    (dev->type != ARPHRD_RAWIP && !nss_redir_is_usb(dev)))
 		return -EOPNOTSUPP;
 
 	return nss_flow_block(dev, type_data, sch, data, cleanup);

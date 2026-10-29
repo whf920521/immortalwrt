@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: GPL-2.0-only
 /* Carrying the connections of devices the firmware has no interface for.
  *
- * A modem's raw-IP device has no switch port behind it, and a radio whose
+ * A modem's raw-IP device or a USB Ethernet device has no switch port behind
+ * it, and a radio whose
  * rings the firmware does not reap - a PCIe ath10k beside the SoC's own
  * radios - hands every frame to the host. The firmware reaches such a device
  * through a generic redirect node pair: what the host hands to one
@@ -12,11 +13,11 @@
  *
  * Packets cross the pair framed as Ethernet. One the firmware does not route
  * comes back still framed and goes up the stack; nothing the modem sends or
- * receives carries the frame, and a radio's frames are Ethernet already.
+ * receives carries the frame; USB Ethernet and radio frames have one already.
  *
  * Only a packet as the device received it fits one firmware buffer, so a
- * radio's GRO is off while a core carries the device: coalesced, a station's
- * upload would never reach the firmware.
+ * Ethernet device's GRO is off while a core carries it: a coalesced packet
+ * would never reach the firmware.
  *
  * A core that restarts loses its nodes, so the pair is made wherever a
  * running core meets a device that is up: when the device comes up and when
@@ -24,6 +25,7 @@
  */
 
 #include <linux/cleanup.h>
+#include <linux/device.h>
 #include <linux/etherdevice.h>
 #include <linux/if_arp.h>
 #include <linux/if_vlan.h>
@@ -76,7 +78,20 @@ static DEFINE_PER_CPU(bool, nss_redir_reinject);
 
 static bool nss_redir_enable = true;
 module_param_named(redir, nss_redir_enable, bool, 0644);
-MODULE_PARM_DESC(redir, "carry raw-IP (cellular) devices and radios the firmware does not drive; read when a device comes up");
+MODULE_PARM_DESC(redir, "carry raw-IP, USB Ethernet and radios the firmware does not drive; read when a device comes up");
+
+/* Both usbnet and r8152 attach the network device to a USB device/interface.
+ * Use that relationship rather than a mutable interface or driver name, and
+ * leave USB Wi-Fi to the radio path below.
+ */
+bool nss_redir_is_usb(const struct net_device *dev)
+{
+	const struct device *parent = dev->dev.parent;
+
+	return dev->type == ARPHRD_ETHER && dev->addr_len == ETH_ALEN &&
+	       !dev->ieee80211_ptr && net_eq(dev_net(dev), &init_net) &&
+	       parent && parent->bus && !strcmp(parent->bus->name, "usb");
+}
 
 static bool nss_redir_wanted(const struct net_device *dev)
 {
@@ -85,6 +100,12 @@ static bool nss_redir_wanted(const struct net_device *dev)
 	 */
 	if (dev->addr_len != ETH_ALEN || !net_eq(dev_net(dev), &init_net))
 		return false;
+
+	/* Firmware receive buffers hold a standard Ethernet frame. A jumbo USB
+	 * device stays in software, including while its MTU is being changed.
+	 */
+	if (nss_redir_is_usb(dev))
+		return dev->mtu <= ETH_DATA_LEN;
 
 	return dev->type == ARPHRD_RAWIP ||
 	       (dev->type == ARPHRD_ETHER && dev->ieee80211_ptr &&
@@ -631,6 +652,23 @@ static int nss_redir_event(struct notifier_block *nb, unsigned long event,
 			guard(mutex)(&core->lock);
 			nss_redir_add(core, dev);
 		} else {
+			nss_redir_add(NULL, dev);
+		}
+		break;
+	case NETDEV_CHANGEMTU:
+	case NETDEV_CHANGEADDR:
+		if (!nss_redir_is_usb(dev) || !(dev->flags & IFF_UP))
+			break;
+		/* Revoke rules before reusing nodes with a new MAC or MTU. This
+		 * also restores GRO when the USB device becomes unsupported and
+		 * re-arms it when its MTU returns to a supported size.
+		 */
+		if (core) {
+			guard(mutex)(&core->lock);
+			nss_redir_del(core, dev);
+			nss_redir_add(core, dev);
+		} else {
+			nss_redir_del(NULL, dev);
 			nss_redir_add(NULL, dev);
 		}
 		break;
